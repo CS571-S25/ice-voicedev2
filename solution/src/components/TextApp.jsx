@@ -78,6 +78,7 @@ function TextApp() {
             const reader = resp.body.getReader();
             const decoder = new TextDecoder("utf-8");
     
+            let unparsedLine = "";
             let constructedString = "";
             let done = false;
             while (!done) {
@@ -88,11 +89,16 @@ function TextApp() {
                     const chunk = decoder.decode(value, { stream: true });
                     const lines = chunk.split("\n").filter(line => line.trim() !== "");
                     for (const line of lines) {
-                        let deltaObj = JSON.parse(line);
-                        constructedString += deltaObj.delta;
-                        
-                        // TODO You should display this to the user in realtime!
-                        console.log(constructedString);
+                        try {
+                            let deltaObj = JSON.parse(unparsedLine + line);
+                            unparsedLine = "";
+                            constructedString += deltaObj.delta;
+
+                            // TODO You should display this to the user in realtime!
+                            console.log(constructedString);
+                        } catch (e) {
+                            unparsedLine += line;
+                        }
                     }
                 }
             }
